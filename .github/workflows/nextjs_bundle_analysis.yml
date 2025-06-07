@@ -66,7 +66,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: bundle
-          path: .next/analyze/__bundle_analysis.json
+          path: apps/web/.next/analyze/__bundle_analysis.json
 
       - name: Download base branch bundle stats
         uses: dawidd6/action-download-artifact@v6
@@ -74,7 +74,7 @@ jobs:
         with:
           workflow: nextjs_bundle_analysis.yml
           branch: ${{ github.event.pull_request.base.ref }}
-          path: .next/analyze/base
+          path: apps/web/.next/analyze/base
           name: bundle
 
       # And here's the second place - this runs after we have both the current and
