@@ -73,6 +73,16 @@ jobs:
           name: bundle
           path: apps/web/.next/analyze/__bundle_analysis.json
 
+      - name: Upload bundle analyzer HTML reports
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: bundle-analyzer-reports
+          path: |
+            apps/web/.next/analyze/client.html
+            apps/web/.next/analyze/edge.html
+            apps/web/.next/analyze/nodejs.html
+
       - name: Download base branch bundle stats
         uses: dawidd6/action-download-artifact@v6
         if: success() && github.event.number
@@ -100,6 +110,9 @@ jobs:
         run: |
           ls -laR .next/analyze/base/bundle
           pnpm tsx ${{ github.workspace }}/.github/scripts/compare.ts
+        env:
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
 
       - name: Get Comment Body
         id: get-comment-body
