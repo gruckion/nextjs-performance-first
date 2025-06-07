@@ -26,5 +26,14 @@
     "@workspace/eslint-config": "workspace:^",
     "@workspace/typescript-config": "workspace:*",
     "typescript": "^5.7.3"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "nextBundleAnalysis": {
+    "budget": 358400,
+    "budgetPercentIncreaseRed": 20,
+    "minimumChangeThreshold": 0,
+    "showDetails": true
   }
 }
