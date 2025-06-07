@@ -1,0 +1,158 @@
+name: Deploy Bundle Reports
+
+on:
+  workflow_run:
+    workflows: ["Next.js Bundle Analysis"]
+    types:
+      - completed
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    # Only deploy from main branch successful builds
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main' }}
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download bundle analyzer reports
+        uses: actions/download-artifact@v4
+        with:
+          name: bundle-analyzer-reports
+          path: ./reports
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create index.html
+        run: |
+          cat > ./reports/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>Bundle Analysis Reports</title>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <style>
+              body { 
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+                margin: 0;
+                padding: 40px;
+                background: #f6f8fa;
+              }
+              .container {
+                max-width: 800px;
+                margin: 0 auto;
+                background: white;
+                padding: 40px;
+                border-radius: 8px;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+              }
+              h1 { 
+                color: #24292e; 
+                margin-top: 0;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+              }
+              .report-grid { 
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 20px;
+                margin-top: 30px;
+              }
+              .report-card {
+                border: 1px solid #e1e4e8;
+                border-radius: 6px;
+                padding: 24px;
+                text-decoration: none;
+                color: inherit;
+                transition: transform 0.2s, box-shadow 0.2s;
+                display: block;
+              }
+              .report-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                border-color: #0366d6;
+              }
+              .report-icon {
+                font-size: 32px;
+                margin-bottom: 12px;
+              }
+              .report-title {
+                font-size: 18px;
+                font-weight: 600;
+                color: #24292e;
+                margin-bottom: 8px;
+              }
+              .report-desc { 
+                color: #586069;
+                font-size: 14px;
+                line-height: 1.5;
+              }
+              .timestamp {
+                color: #586069;
+                font-size: 14px;
+                margin-top: 20px;
+                padding-top: 20px;
+                border-top: 1px solid #e1e4e8;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <h1>
+                <span>📊</span>
+                Next.js Bundle Analysis Reports
+              </h1>
+              <p style="color: #586069; margin-top: -10px;">Interactive bundle size visualizations</p>
+              
+              <div class="report-grid">
+                <a href="client.html" class="report-card">
+                  <div class="report-icon">🌐</div>
+                  <div class="report-title">Client Bundle</div>
+                  <div class="report-desc">Analyze the client-side JavaScript bundle that runs in the browser</div>
+                </a>
+                
+                <a href="edge.html" class="report-card">
+                  <div class="report-icon">⚡</div>
+                  <div class="report-title">Edge Runtime Bundle</div>
+                  <div class="report-desc">Analyze the Edge runtime bundle for Vercel Edge Functions</div>
+                </a>
+                
+                <a href="nodejs.html" class="report-card">
+                  <div class="report-icon">🖥️</div>
+                  <div class="report-title">Node.js Bundle</div>
+                  <div class="report-desc">Analyze the Node.js server-side bundle</div>
+                </a>
+              </div>
+              
+              <div class="timestamp">
+                Generated on <script>document.write(new Date().toLocaleString())</script>
+              </div>
+            </div>
+          </body>
+          </html>
+          EOF
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./reports
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

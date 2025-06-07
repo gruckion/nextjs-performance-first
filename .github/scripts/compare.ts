@@ -397,11 +397,21 @@ const generateOutput = (
 	];
 
 	// Add bundle analyzer report links if available
-	if (process.env.GITHUB_RUN_ID && process.env.GITHUB_REPOSITORY) {
-		const artifactUrl = `https://github.com/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
-		sections.push(
-			`### 📊 Bundle Analyzer Reports\n\nDetailed bundle breakdowns are available:\n- [View all artifacts](${artifactUrl})\n- Look for the **bundle-analyzer-reports** artifact\n- Download and open:\n  - \`client.html\` - Client-side bundle analysis\n  - \`edge.html\` - Edge runtime bundle analysis\n  - \`nodejs.html\` - Node.js runtime bundle analysis\n`,
-		);
+	if (process.env.GITHUB_REPOSITORY) {
+		const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
+		const ghPagesUrl = `https://${owner}.github.io/${repo}`;
+
+		// For PR comments, link to the artifacts that will be deployed
+		if (process.env.GITHUB_RUN_ID) {
+			const artifactUrl = `https://github.com/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
+			sections.push(
+				`### 📊 Bundle Analyzer Reports\n\n**View detailed bundle breakdowns:**\n- 🌐 [Client Bundle](${ghPagesUrl}/client.html)\n- ⚡ [Edge Runtime Bundle](${ghPagesUrl}/edge.html)\n- 🖥️ [Node.js Bundle](${ghPagesUrl}/nodejs.html)\n\n_Reports will be available after deployment to GitHub Pages._\n\n[View workflow artifacts](${artifactUrl}) if you need to download the reports.\n`,
+			);
+		} else {
+			sections.push(
+				`### 📊 Bundle Analyzer Reports\n\n**View detailed bundle breakdowns:**\n- 🌐 [Client Bundle](${ghPagesUrl}/client.html)\n- ⚡ [Edge Runtime Bundle](${ghPagesUrl}/edge.html)\n- 🖥️ [Node.js Bundle](${ghPagesUrl}/nodejs.html)\n`,
+			);
+		}
 	}
 
 	if (globalChanges) {
