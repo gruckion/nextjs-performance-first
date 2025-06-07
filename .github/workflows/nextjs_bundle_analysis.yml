@@ -99,7 +99,7 @@ jobs:
         if: success() && github.event.number
         run: |
           ls -laR .next/analyze/base/bundle
-          node ${{ github.workspace }}/.github/scripts/compare.js
+          pnpm tsx ${{ github.workspace }}/.github/scripts/compare.ts
 
       - name: Get Comment Body
         id: get-comment-body
