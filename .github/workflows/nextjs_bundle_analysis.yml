@@ -99,7 +99,7 @@ jobs:
         if: success() && github.event.number
         run: |
           ls -laR .next/analyze/base/bundle
-          pnpm --package=nextjs-bundle-analysis dlx compare
+          node ${{ github.workspace }}/.github/scripts/compare.js
 
       - name: Get Comment Body
         id: get-comment-body
