@@ -8,42 +8,42 @@ import path from "node:path";
 
 // Strong typing for configuration
 export interface NextBundleAnalysisConfig {
-  budget?: number;
-  budgetPercentIncreaseRed?: number;
-  buildOutputDirectory?: string;
-  minimumChangeThreshold?: number;
-  showDetails?: boolean;
-  skipCommentIfEmpty?: boolean;
+	budget?: number;
+	budgetPercentIncreaseRed?: number;
+	buildOutputDirectory?: string;
+	minimumChangeThreshold?: number;
+	showDetails?: boolean;
+	skipCommentIfEmpty?: boolean;
 }
 
 interface PackageJson {
-  name: string;
-  nextBundleAnalysis?: NextBundleAnalysisConfig;
+	name: string;
+	nextBundleAnalysis?: NextBundleAnalysisConfig;
 }
 
 export interface BundleAnalysisOptions extends NextBundleAnalysisConfig {
-  name: string;
+	name: string;
 }
 
 /**
  * Reads options from `package.json` asynchronously
  */
 export const getOptions = async (
-  pathPrefix: string = process.cwd()
+	pathPrefix: string = process.cwd(),
 ): Promise<BundleAnalysisOptions> => {
-  const packageJsonPath = path.join(pathPrefix, "package.json");
-  const packageJsonContent = await readFile(packageJsonPath, "utf8");
-  const packageJson: PackageJson = JSON.parse(packageJsonContent);
+	const packageJsonPath = path.join(pathPrefix, "package.json");
+	const packageJsonContent = await readFile(packageJsonPath, "utf8");
+	const packageJson: PackageJson = JSON.parse(packageJsonContent);
 
-  return {
-    ...packageJson.nextBundleAnalysis,
-    name: packageJson.name,
-  };
+	return {
+		...packageJson.nextBundleAnalysis,
+		name: packageJson.name,
+	};
 };
 
 /**
  * Gets the output build directory, defaults to `.next`
  */
 export const getBuildOutputDirectory = (
-  options: BundleAnalysisOptions
+	options: BundleAnalysisOptions,
 ): string => options.buildOutputDirectory ?? ".next";
