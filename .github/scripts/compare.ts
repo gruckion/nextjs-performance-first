@@ -304,7 +304,7 @@ const generateGlobalSection = (
 <summary>Details</summary>
 <p>The <strong>global bundle</strong> is the javascript bundle that loads alongside every page. It is in its own category because its impact is much higher - an increase to its size means that every page on your website loads slower, and a decrease means every page loads faster.</p>
 <p>Any third party scripts you have added directly to your app using the <code>&lt;script&gt;</code> tag are not accounted for in this analysis</p>
-<p>If you want further insight into what is behind the changes, check the Bundle Analyzer Reports section at the top of this comment for detailed breakdowns.</p>
+<p>If you want further insight into what is behind the changes, give <a href='https://www.npmjs.com/package/@next/bundle-analyzer'>@next/bundle-analyzer</a> a try!</p>
 </details>\n\n`;
 	}
 
@@ -368,7 +368,6 @@ const generateChangedPagesSection = (
 <p>Only the gzipped size is provided here based on <a href='https://twitter.com/slightlylate/status/1412851269211811845'>an expert tip</a>.</p>
 <p><strong>First Load</strong> is the size of the global bundle plus the bundle for the individual page. If a user were to show up to your website and land on a given page, the first load size represents the amount of javascript that user would need to download. If <code>next/link</code> is used, subsequent page loads would only need to download that page's bundle (the number in the "Size" column), since the global bundle has already been downloaded.</p>
 <p>Any third party scripts you have added directly to your app using the <code>&lt;script&gt;</code> tag are not accounted for in this analysis</p>
-<p>For a detailed breakdown of what's contributing to these bundle sizes, check the Bundle Analyzer Reports section at the top of this comment.</p>
 ${
 	options.budget && globalBundleCurrent
 		? `<p>The "Budget %" column shows what percentage of your performance budget the <strong>First Load</strong> total takes up. For example, if your budget was 100kb, and a given page's first load size was 10kb, it would be 10% of your budget. You can also see how much this has increased or decreased compared to the base branch of your PR. If this percentage has increased by ${budgetPercentIncreaseRed}% or more, there will be a red status indicator applied, indicating that special attention should be given to this. If you see "+/- <0.01%" it means that there was a change in bundle size, but it is a trivial enough amount that it can be ignored.</p>`
@@ -397,21 +396,11 @@ const generateOutput = (
 	];
 
 	// Add bundle analyzer report links if available
-	if (process.env.GITHUB_REPOSITORY) {
-		const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
-		const ghPagesUrl = `https://${owner}.github.io/${repo}`;
-
-		// For PR comments, link to the artifacts that will be deployed
-		if (process.env.GITHUB_RUN_ID) {
-			const artifactUrl = `https://github.com/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
-			sections.push(
-				`### 📊 Bundle Analyzer Reports\n\n**View detailed bundle breakdowns:**\n- 🌐 [Client Bundle](${ghPagesUrl}/client.html)\n- ⚡ [Edge Runtime Bundle](${ghPagesUrl}/edge.html)\n- 🖥️ [Node.js Bundle](${ghPagesUrl}/nodejs.html)\n\n_Reports will be available after deployment to GitHub Pages._\n\n[View workflow artifacts](${artifactUrl}) if you need to download the reports.\n`,
-			);
-		} else {
-			sections.push(
-				`### 📊 Bundle Analyzer Reports\n\n**View detailed bundle breakdowns:**\n- 🌐 [Client Bundle](${ghPagesUrl}/client.html)\n- ⚡ [Edge Runtime Bundle](${ghPagesUrl}/edge.html)\n- 🖥️ [Node.js Bundle](${ghPagesUrl}/nodejs.html)\n`,
-			);
-		}
+	if (process.env.GITHUB_RUN_ID && process.env.GITHUB_REPOSITORY) {
+		const artifactUrl = `https://github.com/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
+		sections.push(
+			`### 📊 Bundle Analyzer Reports\n\nDetailed bundle breakdowns are available:\n- [View all artifacts](${artifactUrl})\n- Look for the **bundle-analyzer-reports** artifact\n- Download and open:\n  - \`client.html\` - Client-side bundle analysis\n  - \`edge.html\` - Edge runtime bundle analysis\n  - \`nodejs.html\` - Node.js runtime bundle analysis\n`,
+		);
 	}
 
 	if (globalChanges) {
