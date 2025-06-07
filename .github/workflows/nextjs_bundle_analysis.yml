@@ -49,7 +49,7 @@ jobs:
         with:
           # if you use a custom build directory, replace all instances of `.next` in this file with your build directory
           # ex: if your app builds to `dist`, replace `.next` with `dist`
-          path: apps/web/.next/cache
+          path: .next/cache
           # change this if you prefer a more strict cache
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('pnpm-lock.yaml') }}
 
@@ -66,7 +66,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: bundle
-          path: apps/web/.next/analyze/__bundle_analysis.json
+          path: .next/analyze/__bundle_analysis.json
 
       - name: Download base branch bundle stats
         uses: dawidd6/action-download-artifact@v6
@@ -74,7 +74,7 @@ jobs:
         with:
           workflow: nextjs_bundle_analysis.yml
           branch: ${{ github.event.pull_request.base.ref }}
-          path: apps/web/.next/analyze/base
+          path: .next/analyze/base
           name: bundle
 
       # And here's the second place - this runs after we have both the current and
@@ -93,8 +93,7 @@ jobs:
       - name: Compare with base branch bundle
         if: success() && github.event.number
         run: |
-          ls
-          ls -laR apps/web/.next/analyze/base
+          ls -laR .next/analyze/base
           pnpm --package=nextjs-bundle-analysis dlx compare
 
       - name: Get Comment Body
@@ -103,7 +102,7 @@ jobs:
         # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#multiline-strings
         run: |
           echo "body<<EOF" >> $GITHUB_OUTPUT
-          echo "$(cat apps/web/.next/analyze/__bundle_analysis_comment.txt)" >> $GITHUB_OUTPUT
+          echo "$(cat .next/analyze/__bundle_analysis_comment.txt)" >> $GITHUB_OUTPUT
           echo EOF >> $GITHUB_OUTPUT
 
       - name: Find Comment
