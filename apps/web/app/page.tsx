@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@workspace/ui/components/button";
 import { MASSIVE_STATIC_DATA, MASSIVE_STRING } from "./massive-data";
 
