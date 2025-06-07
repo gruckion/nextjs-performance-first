@@ -55,14 +55,17 @@ jobs:
           # change this if you prefer a more strict cache
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('pnpm-lock.yaml') }}
 
-      - name: Build next.js app
+      - name: Build next.js app with bundle analyzer
         # change this if your site requires a custom build command
+        env:
+          ANALYZE: true
         run: pnpm build
 
       # Here's the first place where next-bundle-analysis' own script is used
       # This step pulls the raw bundle stats for the current bundle
+      # We use our custom TypeScript script to support App Router
       - name: Analyze bundle
-        run: pnpm --package=nextjs-bundle-analysis dlx report
+        run: pnpm tsx ${{ github.workspace }}/.github/scripts/next-bundle-analysis-app-router.ts
 
       - name: Upload bundle
         uses: actions/upload-artifact@v4
