@@ -31,10 +31,7 @@ interface PageChange extends BundleStats {
 	increase?: boolean;
 }
 
-interface FilesizeOptions {
-	spacer?: string;
-	[key: string]: unknown;
-}
+type FilesizeOptions = Parameters<typeof filesize>[1];
 
 // Override default filesize options to display a non-breakable space as a spacer.
 const formatFilesize = (bytes: number, options?: FilesizeOptions): string => {
@@ -114,10 +111,8 @@ const analyzePages = (
 				const baseStats = baseBundle[page];
 
 				if (!baseStats) {
-					return {
-						...acc,
-						newPages: [...acc.newPages, { page, ...currentStats }],
-					};
+					acc.newPages.push({ page, ...currentStats });
+					return acc;
 				}
 
 				if (currentStats.gzip !== baseStats.gzip) {
@@ -128,10 +123,7 @@ const analyzePages = (
 						minimumChangeThreshold,
 					);
 					if (change) {
-						return {
-							...acc,
-							changedPages: [...acc.changedPages, change],
-						};
+						acc.changedPages.push(change);
 					}
 				}
 
@@ -342,7 +334,7 @@ const generateNewPagesSection = (
  */
 const titleCase = (str: string): string => {
 	return str.replace(/\w\S*/g, (txt) => {
-		return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+		return txt.charAt(0).toUpperCase() + txt.substring(1).toLowerCase();
 	});
 };
 
