@@ -22,9 +22,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          # Fetch all history to allow relative-ci/agent-action
-          # to properly extract commit messages for comparison
-          fetch-depth: 0
+          # Fetch latest 2 commits to allow relative-ci/agent-action
+          # to lookup the pull request corresponding commit message
+          fetch-depth: 2
 
       - uses: pnpm/action-setup@v4
         name: Install pnpm
