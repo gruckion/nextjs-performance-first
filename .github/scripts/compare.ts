@@ -393,8 +393,8 @@ const generateCurrentBundleSection = (
 		.map(([page, stats]) => ({ page, ...stats }))
 		.sort((a, b) => a.page.localeCompare(b.page));
 
-	let section = `### 📊 Current Bundle State\n\n`;
-	section += `All pages in the current bundle:\n\n`;
+	let section = "### 📊 Current Bundle State\n\n";
+	section += "All pages in the current bundle:\n\n";
 	section += `${markdownTable(currentPages, globalBundleCurrent, null, options)}\n`;
 
 	if (globalBundleCurrent) {
