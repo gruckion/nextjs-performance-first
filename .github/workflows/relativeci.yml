@@ -1,0 +1,58 @@
+name: RelativeCI Bundle Analysis
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: ./apps/web
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      NEXT_TELEMETRY_DISABLED: 1
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
+        with:
+          run_install: false
+
+      - uses: actions/setup-node@v4
+        name: Install Node.js
+        with:
+          node-version: 22.x
+          cache: "pnpm"
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Restore next build cache
+        uses: actions/cache@v4
+        id: restore-build-cache
+        env:
+          cache-name: cache-next-build-relativeci
+        with:
+          path: .next/cache
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Build Next.js app with webpack stats
+        env:
+          RELATIVE_CI: true
+        run: pnpm build
+
+      - name: Send bundle stats to RelativeCI
+        uses: relative-ci/agent-action@v3
+        with:
+          webpackStatsFile: ./webpack-stats.json
+          key: ${{ secrets.RELATIVE_CI_KEY }}
