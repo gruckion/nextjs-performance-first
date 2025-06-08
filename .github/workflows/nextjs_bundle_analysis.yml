@@ -55,20 +55,33 @@ jobs:
           # change this if you prefer a more strict cache
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('pnpm-lock.yaml') }}
 
-      - name: Build next.js app
+      - name: Build next.js app with bundle analyzer
         # change this if your site requires a custom build command
+        env:
+          ANALYZE: true
         run: pnpm build
 
       # Here's the first place where next-bundle-analysis' own script is used
       # This step pulls the raw bundle stats for the current bundle
+      # We use our custom TypeScript script to support App Router
       - name: Analyze bundle
-        run: pnpm --package=nextjs-bundle-analysis dlx report
+        run: pnpm tsx ${{ github.workspace }}/.github/scripts/next-bundle-analysis-app-router.ts
 
       - name: Upload bundle
         uses: actions/upload-artifact@v4
         with:
           name: bundle
           path: apps/web/.next/analyze/__bundle_analysis.json
+
+      - name: Upload bundle analyzer HTML reports
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: bundle-analyzer-reports
+          path: |
+            apps/web/.next/analyze/client.html
+            apps/web/.next/analyze/edge.html
+            apps/web/.next/analyze/nodejs.html
 
       - name: Download base branch bundle stats
         uses: dawidd6/action-download-artifact@v6
@@ -96,7 +109,10 @@ jobs:
         if: success() && github.event.number
         run: |
           ls -laR .next/analyze/base/bundle
-          pnpm --package=nextjs-bundle-analysis dlx compare
+          pnpm tsx ${{ github.workspace }}/.github/scripts/compare.ts
+        env:
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
 
       - name: Get Comment Body
         id: get-comment-body

@@ -11,7 +11,12 @@
   "devDependencies": {
     "@workspace/eslint-config": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
+    "filesize": "6",
+    "gzip-size": "6",
+    "mkdirp": "^3.0.1",
+    "number-to-words": "^1.2.4",
     "prettier": "^3.5.1",
+    "tsx": "^4.19.4",
     "turbo": "^2.4.2",
     "typescript": "5.7.3"
   },
