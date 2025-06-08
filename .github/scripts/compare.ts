@@ -380,6 +380,31 @@ ${
 };
 
 /**
+ * Generates the current bundle state section
+ */
+const generateCurrentBundleSection = (
+	currentBundle: BundleData,
+	globalBundleCurrent: BundleStats,
+	options: BundleAnalysisOptions,
+): string => {
+	// Convert bundle data to PageChange format without diffs
+	const currentPages = Object.entries(currentBundle)
+		.filter(([page]) => page !== "__global")
+		.map(([page, stats]) => ({ page, ...stats }))
+		.sort((a, b) => a.page.localeCompare(b.page));
+
+	let section = `### 📊 Current Bundle State\n\n`;
+	section += `All pages in the current bundle:\n\n`;
+	section += `${markdownTable(currentPages, globalBundleCurrent, null, options)}\n`;
+
+	if (globalBundleCurrent) {
+		section += `\n**Global Bundle**: \`${formatFilesize(globalBundleCurrent.gzip)}\` (compressed)\n`;
+	}
+
+	return section;
+};
+
+/**
  * Main function to generate the output
  */
 const generateOutput = (
@@ -389,6 +414,7 @@ const generateOutput = (
 	changedPages: PageChange[],
 	globalBundleCurrent: BundleStats,
 	globalBundleBase: BundleStats,
+	currentBundle: BundleData,
 	options: BundleAnalysisOptions,
 ): string => {
 	const sections: string[] = [
@@ -427,7 +453,13 @@ const generateOutput = (
 	const hasNoChanges =
 		!newPages.length && !changedPages.length && !globalChanges;
 	if (hasNoChanges) {
-		sections.push("This PR introduced no changes to the JavaScript bundle! 🙌");
+		sections.push(
+			"### ✅ No Bundle Size Changes\n\nThis PR introduced no changes to the JavaScript bundle sizes.\n",
+		);
+		// Always show current bundle state
+		sections.push(
+			generateCurrentBundleSection(currentBundle, globalBundleCurrent, options),
+		);
 	}
 
 	sections.push(`<!-- __NEXTJS_BUNDLE_${packageName} -->`);
@@ -490,6 +522,7 @@ async function main() {
 			changedPages,
 			globalBundleCurrent,
 			globalBundleBase,
+			currentBundle,
 			options,
 		);
 
