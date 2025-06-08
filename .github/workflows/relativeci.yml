@@ -21,6 +21,10 @@ jobs:
       NEXT_TELEMETRY_DISABLED: 1
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Fetch all history to allow relative-ci/agent-action
+          # to properly extract commit messages for comparison
+          fetch-depth: 0
 
       - uses: pnpm/action-setup@v4
         name: Install pnpm
@@ -51,8 +55,21 @@ jobs:
           RELATIVE_CI: true
         run: pnpm build
 
+      - name: Check webpack stats file
+        run: |
+          echo "Checking for webpack-stats.json..."
+          ls -la ./
+          ls -la ../
+          if [ -f webpack-stats.json ]; then
+            echo "Found webpack-stats.json in current directory"
+          elif [ -f ../webpack-stats.json ]; then
+            echo "Found webpack-stats.json in parent directory"
+          else
+            echo "webpack-stats.json not found!"
+          fi
+
       - name: Send bundle stats to RelativeCI
         uses: relative-ci/agent-action@v3
         with:
-          webpackStatsFile: ./webpack-stats.json
+          webpackStatsFile: ./apps/web/webpack-stats.json
           key: ${{ secrets.RELATIVE_CI_KEY }}
