@@ -16,9 +16,20 @@ function configureRelativeCI(config, isServer) {
 		// Output stats file to the project root (apps/web/) instead of .next/
 		filename: "../webpack-stats.json",
 		stats: {
+			all: true,
 			assets: true,
 			chunks: true,
+			entrypoints: true,
 			modules: true,
+			builtAt: true,
+			hash: true,
+			publicPath: true,
+			namedChunkGroups: true,
+			chunkGroups: true,
+			chunkModules: true,
+			chunkOrigins: true,
+			reasons: true,
+			source: true,
 		},
 		transform: (webpackStats) => {
 			// Filter out the stats that are not needed for RelativeCI
